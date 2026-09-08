@@ -77,7 +77,7 @@ def make_handler(folder, token):
             except ValueError:
                 size = -1
             if size < 0 or size > MAX_UPLOAD:
-                self.send_error(413, "File troppo grande o dimensione mancante")
+                self.send_error(413, "File too large or missing size")
                 return
 
             name = self.headers.get("X-Filename", "file")
@@ -89,7 +89,7 @@ def make_handler(folder, token):
                     while remaining:
                         chunk = self.rfile.read(min(1024 * 1024, remaining))
                         if not chunk:
-                            raise ConnectionError("Upload interrotto")
+                            raise ConnectionError("Upload interrupted")
                         output.write(chunk)
                         remaining -= len(chunk)
                 partial.replace(target)
@@ -109,7 +109,7 @@ def make_handler(folder, token):
                 label = html.escape(item.name)
                 size = format_size(item.stat().st_size)
                 rows.append(f'<li><a href="files/{quoted}" download>{label}</a><small>{size}</small></li>')
-            files = "".join(rows) or "<li>Nessun file</li>"
+            files = "".join(rows) or "<li>No files</li>"
             page = PAGE.replace("{{FILES}}", files).encode()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -147,18 +147,22 @@ def make_handler(folder, token):
 
 
 PAGE = """<!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <title>QrOpen</title><style>
-*{box-sizing:border-box}body{font:16px system-ui;margin:0;background:#f4f5f7;color:#171717}main{max-width:650px;margin:auto;padding:24px}
-.box{background:white;border-radius:16px;padding:20px;box-shadow:0 4px 20px #0001;margin-bottom:18px}h1,h2{margin-top:0}
-input{width:100%;padding:28px 12px;border:2px dashed #777;border-radius:12px}button{width:100%;margin-top:12px;padding:12px;border:0;border-radius:10px;background:#1769e0;color:white;font-weight:700}
-button:disabled{opacity:.55}progress{width:100%;margin-top:12px}ul{list-style:none;padding:0;margin:0}li{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #ddd}a{color:#075dc7;overflow-wrap:anywhere}small{margin-left:auto;white-space:nowrap;color:#666}#status{min-height:24px}
-</style></head><body><main><h1>QrOpen</h1><section class="box"><h2>Invia al PC</h2><input id="picker" type="file" multiple><button id="send">Invia</button><progress id="progress" value="0" max="1" hidden></progress><div id="status" role="status"></div></section><section class="box"><h2>Scarica dal PC</h2><ul>{{FILES}}</ul></section></main>
+*{box-sizing:border-box}body{margin:0;background:#fdfcfc;color:#201d1d;font:16px/1.5 Consolas,"Liberation Mono","Courier New",monospace}main{max-width:680px;margin:auto;padding:48px 24px 64px}
+header{margin-bottom:32px}.wordmark{font-size:38px;font-weight:700;line-height:1.2}header p{margin:8px 0 0;color:#646262;font-size:14px}
+.terminal{margin-bottom:48px;padding:32px;background:#201d1d;color:#fdfcfc}.terminal strong{display:block;font-size:16px}.terminal p{margin:32px 0 4px;padding:10px 12px;border-radius:4px;background:#302c2c}.terminal small{color:#9a9898}
+section.transfer{padding:24px 0;border-top:1px solid #dedada}h2{margin:0 0 16px;font-size:16px}input{width:100%;padding:12px;background:#f8f7f7;color:#201d1d;border:1px solid #dedada;border-radius:4px;font:inherit}
+input:focus{background:#fdfcfc;border-color:#201d1d;outline:0}input::file-selector-button{margin-right:12px;padding:6px 12px;border:1px solid #646262;border-radius:4px;background:#fdfcfc;color:#201d1d;font:inherit;cursor:pointer}
+button{width:100%;margin-top:12px;padding:6px 20px;border:1px solid #201d1d;border-radius:4px;background:#201d1d;color:#fdfcfc;font:500 16px/2 Consolas,"Liberation Mono","Courier New",monospace;cursor:pointer}button:active{background:#0f0000}button:disabled{background:#f1eeee;color:#9a9898;border-color:#f1eeee;cursor:default}
+progress{width:100%;margin-top:12px;accent-color:#201d1d}#status{min-height:24px;margin-top:8px;color:#646262}ul{list-style:none;padding:0;margin:0}li{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #dedada}li::before{content:"[+]";font-weight:700}a{color:#201d1d;text-decoration:underline;overflow-wrap:anywhere}small{margin-left:auto;white-space:nowrap;color:#646262}
+@media(max-width:640px){main{padding:32px 18px 48px}.wordmark{font-size:28px}.terminal{padding:24px 18px;margin-bottom:32px}li{font-size:14px}}
+</style></head><body><main><header><div class="wordmark">QROPEN</div><p>[ LAN FILE TRANSFER ]</p></header><section class="terminal"><strong>[x] server active</strong><p>computer &lt;-&gt; smartphone</p><small>same network required</small></section><section class="transfer"><h2>[+] Send to computer</h2><input id="picker" type="file" multiple><button id="send">Send files</button><progress id="progress" value="0" max="1" hidden></progress><div id="status" role="status"></div></section><section class="transfer"><h2>[+] Download from computer</h2><ul>{{FILES}}</ul></section></main>
 <script>
 const picker=document.querySelector('#picker'),button=document.querySelector('#send'),bar=document.querySelector('#progress'),status=document.querySelector('#status');
 button.onclick=async()=>{if(!picker.files.length)return;button.disabled=true;bar.hidden=false;let done=0;
-try{for(const file of picker.files){status.textContent=`Invio ${file.name}...`;const response=await fetch('upload',{method:'POST',headers:{'X-Filename':encodeURIComponent(file.name),'Content-Type':'application/octet-stream'},body:file});if(!response.ok)throw Error(`${response.status} ${response.statusText}`);bar.value=++done/picker.files.length}status.textContent='Invio completato.';setTimeout(()=>location.reload(),500)}
-catch(error){status.textContent=`Errore: ${error.message}`;button.disabled=false}};
+try{for(const file of picker.files){status.textContent=`Sending ${file.name}...`;const response=await fetch('upload',{method:'POST',headers:{'X-Filename':encodeURIComponent(file.name),'Content-Type':'application/octet-stream'},body:file});if(!response.ok)throw Error(`${response.status} ${response.statusText}`);bar.value=++done/picker.files.length}status.textContent='Transfer complete.';setTimeout(()=>location.reload(),500)}
+catch(error){status.textContent=`Error: ${error.message}`;button.disabled=false}};
 </script></body></html>"""
 
 
@@ -217,18 +221,18 @@ class App:
         self.qr_image = ImageTk.PhotoImage(image)
         ttk.Label(hero, image=self.qr_image, background=canvas).grid()
 
-        ttk.Label(frame, text="Scansiona dal telefono", style="Body.TLabel", anchor="center").grid(row=3, column=0, columnspan=2, sticky="ew", pady=(18, 4))
+        ttk.Label(frame, text="Scan with your phone", style="Body.TLabel", anchor="center").grid(row=3, column=0, columnspan=2, sticky="ew", pady=(18, 4))
         link = ttk.Label(frame, text=self.url, cursor="hand2", style="Link.TLabel", anchor="center")
         link.grid(row=4, column=0, columnspan=2, sticky="ew")
         link.bind("<Button-1>", lambda _event: webbrowser.open(self.url))
 
         ttk.Separator(frame, style="Rule.TSeparator").grid(row=5, column=0, columnspan=2, sticky="ew", pady=18)
-        ttk.Label(frame, text="[+] CARTELLA CONDIVISA", style="Meta.TLabel", anchor="center").grid(row=6, column=0, columnspan=2, sticky="ew")
+        ttk.Label(frame, text="[+] SHARED FOLDER", style="Meta.TLabel", anchor="center").grid(row=6, column=0, columnspan=2, sticky="ew")
         self.folder_label = ttk.Label(frame, text=str(self.folder), width=40, style="Body.TLabel", anchor="center")
         self.folder_label.grid(row=7, column=0, columnspan=2, sticky="ew", pady=(4, 16))
-        ttk.Button(frame, text="Cambia cartella", command=self.change_folder, style="Primary.TButton").grid(row=8, column=0, sticky="ew", padx=(0, 4))
-        ttk.Button(frame, text="Chiudi", command=self.close, style="Secondary.TButton").grid(row=8, column=1, sticky="ew", padx=(4, 0))
-        ttk.Label(frame, text="[x] server attivo", style="Meta.TLabel", anchor="center").grid(row=9, column=0, columnspan=2, sticky="ew", pady=(18, 0))
+        ttk.Button(frame, text="Change folder", command=self.change_folder, style="Primary.TButton").grid(row=8, column=0, sticky="ew", padx=(0, 4))
+        ttk.Button(frame, text="Close", command=self.close, style="Secondary.TButton").grid(row=8, column=1, sticky="ew", padx=(4, 0))
+        ttk.Label(frame, text="[x] server active", style="Meta.TLabel", anchor="center").grid(row=9, column=0, columnspan=2, sticky="ew", pady=(18, 0))
 
     def change_folder(self):
         chosen = filedialog.askdirectory(initialdir=self.folder)
@@ -245,7 +249,7 @@ class App:
 
     def run(self):
         if local_ip() == "127.0.0.1":
-            messagebox.showwarning(APP_NAME, "Rete locale non trovata. Collega PC e telefono alla stessa rete Wi-Fi.")
+            messagebox.showwarning(APP_NAME, "Local network not found. Connect the computer and phone to the same Wi-Fi network.")
         self.root.mainloop()
 
 

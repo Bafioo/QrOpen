@@ -26,6 +26,10 @@ class TransferTest(unittest.TestCase):
                 connection.request("GET", "/secret/files/note.txt")
                 response = connection.getresponse()
                 self.assertEqual((response.status, response.read()), (200, b"hello"))
+                connection.request("GET", "/secret/")
+                page = connection.getresponse().read()
+                self.assertIn(b'<html lang="en">', page)
+                self.assertIn(b"Send to computer", page)
                 self.assertEqual((folder / "note (1).txt").read_bytes(), b"again")
                 self.assertEqual((folder / "windows.txt").read_bytes(), b"windows")
             finally:

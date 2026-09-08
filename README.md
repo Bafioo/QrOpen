@@ -2,58 +2,58 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="images/file-folder-white.png">
     <source media="(prefers-color-scheme: light)" srcset="images/file-folder.png">
-    <img src="images/file-folder.png" alt="Logo QrOpen" width="88">
+    <img src="images/file-folder.png" alt="QrOpen logo" width="88">
   </picture>
 </p>
 
 <h1 align="center">QrOpen</h1>
 
 <p align="center">
-  Trasferimento file bidirezionale tra computer e smartphone.<br>
-  Nessuna app sul telefono. Nessun cloud. Solo rete locale e QR code.
+  Two-way file transfer between computers and smartphones.<br>
+  No phone app. No cloud. Just a local network and a QR code.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10%2B-201d1d?style=flat-square&logo=python&logoColor=fdfcfc" alt="Python 3.10 o superiore">
-  <img src="https://img.shields.io/badge/OS-Windows%20%7C%20Linux-201d1d?style=flat-square" alt="Windows e Linux">
-  <img src="https://img.shields.io/badge/trasferimento-LAN-201d1d?style=flat-square" alt="Trasferimento su rete locale">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-201d1d?style=flat-square&logo=python&logoColor=fdfcfc" alt="Python 3.10 or newer">
+  <img src="https://img.shields.io/badge/OS-Windows%20%7C%20Linux-201d1d?style=flat-square" alt="Windows and Linux">
+  <img src="https://img.shields.io/badge/transfer-LAN-201d1d?style=flat-square" alt="Local network transfer">
 </p>
 
 ---
 
-QrOpen apre un server HTTP temporaneo sul computer e mostra un QR code. Scansionalo dallo smartphone per scaricare i file condivisi o inviarne di nuovi al computer.
+QrOpen starts a temporary HTTP server on your computer and displays a QR code. Scan it with your smartphone to download shared files or send new files to the computer.
 
-## `[+]` Funzioni
+## `[+]` Features
 
-- `[+]` Trasferimento **PC → smartphone** tramite browser.
-- `[+]` Trasferimento **smartphone → PC**, anche di più file.
-- `[+]` QR code e indirizzo pronti a ogni avvio.
-- `[+]` Scelta della cartella condivisa dalla GUI.
-- `[+]` Upload e download in streaming, senza caricare l'intero file in memoria.
-- `[+]` Rinomina automatica dei duplicati: `foto (1).jpg`, `foto (2).jpg`.
-- `[+]` Interfaccia desktop minimale per Windows e Linux.
-- `[+]` Nessun account, database, tunnel o servizio cloud.
+- `[+]` Transfer files from **computer to smartphone** through a browser.
+- `[+]` Transfer one or more files from **smartphone to computer**.
+- `[+]` QR code and address ready at every launch.
+- `[+]` Choose the shared folder from the desktop interface.
+- `[+]` Stream uploads and downloads without loading entire files into memory.
+- `[+]` Rename duplicates automatically: `photo (1).jpg`, `photo (2).jpg`.
+- `[+]` Minimal desktop interface for Windows and Linux.
+- `[+]` No account, database, tunnel, or cloud service.
 
-## `[>]` Uso
+## `[>]` Usage
 
-1. Collega computer e smartphone alla stessa rete Wi-Fi.
-2. Avvia QrOpen.
-3. Scegli la cartella da condividere, se necessario.
-4. Scansiona il QR code con lo smartphone.
-5. Scarica i file elencati oppure seleziona quelli da inviare al computer.
-6. Chiudi QrOpen per arrestare il server.
+1. Connect the computer and smartphone to the same Wi-Fi network.
+2. Start QrOpen.
+3. Select the folder to share if needed.
+4. Scan the QR code with the smartphone.
+5. Download listed files or select files to send to the computer.
+6. Close QrOpen to stop the server.
 
-## `[$]` Installazione
+## `[$]` Installation
 
-### Windows — eseguibile
+### Windows — executable
 
-Scarica `QrOpen.exe` dalla sezione **Releases** ed eseguilo. Non richiede installazione né Python.
+Download `QrOpen.exe` from the [latest release](https://github.com/Bafioo/QrOpen/releases/latest) and run it. Python and installation are not required.
 
-> L'eseguibile non è firmato digitalmente. Windows SmartScreen potrebbe mostrare un avviso al primo avvio.
+> The executable is not digitally signed. Windows SmartScreen may display a warning on first launch.
 
-### Windows — codice sorgente
+### Windows — source code
 
-Richiede Python 3.10 o superiore.
+Requires Python 3.10 or newer.
 
 ```powershell
 py -m venv .venv
@@ -61,9 +61,9 @@ py -m venv .venv
 .\.venv\Scripts\python.exe .\Python\qropen.py
 ```
 
-### Linux — codice sorgente
+### Linux — source code
 
-Installa Python, `venv` e Tk. Su Debian/Ubuntu:
+Install Python, `venv`, and Tk. On Debian or Ubuntu:
 
 ```bash
 sudo apt install python3 python3-venv python3-tk
@@ -72,20 +72,20 @@ python3 -m venv .venv
 ./.venv/bin/python Python/qropen.py
 ```
 
-## `[x]` Sicurezza
+## `[x]` Security
 
-- Il link contiene un token casuale nuovo a ogni avvio.
-- I nomi ricevuti vengono ripuliti per impedire percorsi esterni alla cartella condivisa.
-- La lista esclude link simbolici e file `.part` incompleti.
-- I file esistenti non vengono sovrascritti.
-- Ogni upload è limitato a **10 GiB**.
-- Il server termina quando chiudi l'app.
+- The link contains a new random token for every launch.
+- Received filenames are sanitized to prevent access outside the shared folder.
+- Symbolic links and incomplete `.part` files are excluded from listings.
+- Existing files are never overwritten.
+- Each upload is limited to **10 GiB**.
+- The server stops when the application closes.
 
-QrOpen usa HTTP locale senza cifratura. Chi possiede il QR o il link può leggere e caricare file finché il server resta aperto. Usalo solo su reti fidate e condividi una cartella senza dati riservati.
+QrOpen uses unencrypted HTTP on the local network. Anyone with the QR code or link can read and upload files while the server is running. Use it only on trusted networks and share a folder without sensitive data.
 
-## `[?]` Verifica
+## `[?]` Testing
 
-Esegui i test dalla radice del progetto:
+Run tests from the project root:
 
 ```bash
 python -m unittest discover -s Python -p "test_*.py" -v
@@ -93,7 +93,7 @@ python -m unittest discover -s Python -p "test_*.py" -v
 
 ## `[#]` Build
 
-PyInstaller crea un binario solo per il sistema sul quale viene eseguito. Compila su Windows per ottenere `.exe` e su Linux per ottenere il binario Linux.
+PyInstaller creates a binary only for the operating system running the build. Build on Windows for an `.exe`, or on Linux for a Linux binary.
 
 ```bash
 python -m pip install pyinstaller
@@ -108,26 +108,26 @@ FileExe/dist/QrOpen.exe   # Windows
 FileExe/dist/QrOpen       # Linux
 ```
 
-## `[/]` Struttura
+## `[/]` Structure
 
 ```text
 QrOpen/
 ├── Python/
-│   ├── qropen.py          # applicazione e server locale
-│   ├── test_qropen.py     # test di trasferimento e sicurezza nomi
+│   ├── qropen.py          # application and local server
+│   ├── test_qropen.py     # transfer and filename safety tests
 │   └── requirements.txt
 ├── FileExe/
-│   └── QrOpen.spec        # configurazione PyInstaller
-├── images/                # icone Windows e GUI
-├── DESIGN.md              # linee guida visive
+│   └── QrOpen.spec        # PyInstaller configuration
+├── images/                # Windows and GUI icons
+├── DESIGN.md              # visual guidelines
 ├── README.md
 └── .gitignore
 ```
 
-## `[+]` Contribuire
+## `[+]` Contributing
 
-Issue e pull request sono benvenute. Mantieni le modifiche piccole, esegui i test e non includere cartelle `build/`, `dist/`, ambienti virtuali o file personali.
+Issues and pull requests are welcome. Keep changes small, run the tests, and do not include `build/`, `dist/`, virtual environments, or personal files.
 
 ---
 
-<p align="center"><code>[x] locale · temporaneo · bidirezionale</code></p>
+<p align="center"><code>[x] local · temporary · two-way</code></p>
