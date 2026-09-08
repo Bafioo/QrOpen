@@ -21,9 +21,11 @@
 
 ---
 
-> `[testing]` This branch uses a Cloudflare Quick Tunnel. The stable `main` branch remains LAN-only.
-
 QrOpen starts a local HTTP server, exposes it through a temporary Cloudflare HTTPS URL, and displays a QR code. The computer and smartphone can use different networks.
+
+```text
+smartphone --HTTPS--> Cloudflare edge --Tunnel--> QrOpen on 127.0.0.1
+```
 
 ## `[+]` Features
 
@@ -49,13 +51,13 @@ QrOpen starts a local HTTP server, exposes it through a temporary Cloudflare HTT
 
 ### Windows — executable
 
-The testing build requires `cloudflared` on the computer. Install it first:
+QrOpen requires `cloudflared` on the computer. Install it first:
 
 ```powershell
 winget install --id Cloudflare.cloudflared
 ```
 
-Build the executable from this branch using the instructions below.
+Then download `QrOpen.exe` from the [latest release](https://github.com/Bafioo/QrOpen/releases/latest) and run it. Python and installation are not required.
 
 > The executable is not digitally signed. Windows SmartScreen may display a warning on first launch.
 
@@ -87,12 +89,14 @@ python3 -m venv .venv
 - Received filenames are sanitized to prevent access outside the shared folder.
 - Symbolic links and incomplete `.part` files are excluded from listings.
 - Existing files are never overwritten.
-- Each upload is limited to **10 GiB**.
+- Each uploaded file is limited to **100 MB**, matching Cloudflare's Free-plan request limit.
 - The server stops when the application closes.
 
-Traffic between the browser and Cloudflare uses HTTPS. Anyone with the QR code or full link can read and upload files while the server is running. Share the link only with trusted people and select a folder without sensitive data.
+Traffic between the browser and Cloudflare uses HTTPS, and `cloudflared` creates the outbound tunnel to the local server. No inbound router port is opened. Cloudflare remains an intermediary for transferred data.
 
-Cloudflare Quick Tunnels are intended for testing and development, provide no uptime SLA, and allow up to 200 concurrent in-flight requests. Large uploads may also be subject to Cloudflare request limits. Use a named Cloudflare Tunnel for production.
+Anyone with the QR code or full link can read and upload files while the server is running. Share it only with trusted people, select a folder without sensitive data, and close QrOpen immediately after the transfer.
+
+Cloudflare Quick Tunnels are intended for testing and development, provide no uptime SLA, and allow up to 200 concurrent in-flight requests. The public URL changes at every launch. Downloads have no fixed response-body limit, but connection speed and timeout constraints still apply. Use a named Cloudflare Tunnel for production.
 
 Quick Tunnels may not start when `~/.cloudflared/config.yaml` exists. Move that configuration out of the directory temporarily or use a named tunnel instead.
 

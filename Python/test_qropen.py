@@ -4,7 +4,7 @@ import threading
 import unittest
 from pathlib import Path
 
-from qropen import TUNNEL_URL, make_handler
+from qropen import MAX_UPLOAD, TUNNEL_URL, make_handler
 from http.server import ThreadingHTTPServer
 
 
@@ -34,6 +34,8 @@ class TransferTest(unittest.TestCase):
                 page = connection.getresponse().read()
                 self.assertIn(b'<html lang="en">', page)
                 self.assertIn(b"Send to computer", page)
+                connection.request("POST", "/secret/upload", headers={"Content-Length": str(MAX_UPLOAD + 1)})
+                self.assertEqual(connection.getresponse().status, 413)
                 self.assertEqual((folder / "note (1).txt").read_bytes(), b"again")
                 self.assertEqual((folder / "windows.txt").read_bytes(), b"windows")
             finally:

@@ -16,7 +16,7 @@ from tkinter import Tk, filedialog, messagebox, ttk
 
 
 APP_NAME = "QrOpen"
-MAX_UPLOAD = 10 * 1024**3
+MAX_UPLOAD = 100_000_000
 TUNNEL_URL = re.compile(r"https://[a-z0-9-]+\.trycloudflare\.com")
 
 
@@ -120,7 +120,7 @@ def make_handler(folder, token):
             except ValueError:
                 size = -1
             if size < 0 or size > MAX_UPLOAD:
-                self.send_error(413, "File too large or missing size")
+                self.send_error(413, "File too large (100 MB maximum) or missing size")
                 return
 
             name = self.headers.get("X-Filename", "file")
@@ -201,7 +201,7 @@ input:focus{background:#fdfcfc;border-color:#201d1d;outline:0}input::file-select
 button{width:100%;margin-top:12px;padding:6px 20px;border:1px solid #201d1d;border-radius:4px;background:#201d1d;color:#fdfcfc;font:500 16px/2 Consolas,"Liberation Mono","Courier New",monospace;cursor:pointer}button:active{background:#0f0000}button:disabled{background:#f1eeee;color:#9a9898;border-color:#f1eeee;cursor:default}
 progress{width:100%;margin-top:12px;accent-color:#201d1d}#status{min-height:24px;margin-top:8px;color:#646262}ul{list-style:none;padding:0;margin:0}li{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #dedada}li::before{content:"[+]";font-weight:700}a{color:#201d1d;text-decoration:underline;overflow-wrap:anywhere}small{margin-left:auto;white-space:nowrap;color:#646262}
 @media(max-width:640px){main{padding:32px 18px 48px}.wordmark{font-size:28px}.terminal{padding:24px 18px;margin-bottom:32px}li{font-size:14px}}
-</style></head><body><main><header><div class="wordmark">QROPEN</div><p>[ INTERNET FILE TRANSFER ]</p></header><section class="terminal"><strong>[x] secure tunnel active</strong><p>computer &lt;-&gt; smartphone</p><small>works across different networks</small></section><section class="transfer"><h2>[+] Send to computer</h2><input id="picker" type="file" multiple><button id="send">Send files</button><progress id="progress" value="0" max="1" hidden></progress><div id="status" role="status"></div></section><section class="transfer"><h2>[+] Download from computer</h2><ul>{{FILES}}</ul></section></main>
+</style></head><body><main><header><div class="wordmark">QROPEN</div><p>[ INTERNET FILE TRANSFER ]</p></header><section class="terminal"><strong>[x] secure tunnel active</strong><p>computer &lt;-&gt; smartphone</p><small>works across different networks</small></section><section class="transfer"><h2>[+] Send to computer</h2><input id="picker" type="file" multiple><small>100 MB maximum per file</small><button id="send">Send files</button><progress id="progress" value="0" max="1" hidden></progress><div id="status" role="status"></div></section><section class="transfer"><h2>[+] Download from computer</h2><ul>{{FILES}}</ul></section></main>
 <script>
 const picker=document.querySelector('#picker'),button=document.querySelector('#send'),bar=document.querySelector('#progress'),status=document.querySelector('#status');
 button.onclick=async()=>{if(!picker.files.length)return;button.disabled=true;bar.hidden=false;let done=0;
