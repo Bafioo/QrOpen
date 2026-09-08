@@ -10,34 +10,36 @@
 
 <p align="center">
   Two-way file transfer between computers and smartphones.<br>
-  No phone app. No cloud. Just a local network and a QR code.
+  No phone app or account. Just a temporary HTTPS tunnel and a QR code.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%2B-201d1d?style=flat-square&logo=python&logoColor=fdfcfc" alt="Python 3.10 or newer">
   <img src="https://img.shields.io/badge/OS-Windows%20%7C%20Linux-201d1d?style=flat-square" alt="Windows and Linux">
-  <img src="https://img.shields.io/badge/transfer-LAN-201d1d?style=flat-square" alt="Local network transfer">
+  <img src="https://img.shields.io/badge/transfer-Internet-201d1d?style=flat-square" alt="Internet transfer">
 </p>
 
 ---
 
-QrOpen starts a temporary HTTP server on your computer and displays a QR code. Scan it with your smartphone to download shared files or send new files to the computer.
+> `[testing]` This branch uses a Cloudflare Quick Tunnel. The stable `main` branch remains LAN-only.
+
+QrOpen starts a local HTTP server, exposes it through a temporary Cloudflare HTTPS URL, and displays a QR code. The computer and smartphone can use different networks.
 
 ## `[+]` Features
 
 - `[+]` Transfer files from **computer to smartphone** through a browser.
 - `[+]` Transfer one or more files from **smartphone to computer**.
-- `[+]` QR code and address ready at every launch.
+- `[+]` Temporary public HTTPS address and QR code ready at every launch.
 - `[+]` Choose the shared folder from the desktop interface.
 - `[+]` Stream uploads and downloads without loading entire files into memory.
 - `[+]` Rename duplicates automatically: `photo (1).jpg`, `photo (2).jpg`.
 - `[+]` Minimal desktop interface for Windows and Linux.
-- `[+]` No account, database, tunnel, or cloud service.
+- `[+]` No account, database, domain, port forwarding, or router setup.
 
 ## `[>]` Usage
 
-1. Connect the computer and smartphone to the same Wi-Fi network.
-2. Start QrOpen.
+1. Connect the computer to the Internet.
+2. Start QrOpen and wait for the Quick Tunnel URL.
 3. Select the folder to share if needed.
 4. Scan the QR code with the smartphone.
 5. Download listed files or select files to send to the computer.
@@ -47,7 +49,13 @@ QrOpen starts a temporary HTTP server on your computer and displays a QR code. S
 
 ### Windows — executable
 
-Download `QrOpen.exe` from the [latest release](https://github.com/Bafioo/QrOpen/releases/latest) and run it. Python and installation are not required.
+The testing build requires `cloudflared` on the computer. Install it first:
+
+```powershell
+winget install --id Cloudflare.cloudflared
+```
+
+Build the executable from this branch using the instructions below.
 
 > The executable is not digitally signed. Windows SmartScreen may display a warning on first launch.
 
@@ -63,7 +71,7 @@ py -m venv .venv
 
 ### Linux — source code
 
-Install Python, `venv`, and Tk. On Debian or Ubuntu:
+Install Python, `venv`, Tk, and [`cloudflared`](https://developers.cloudflare.com/tunnel/downloads/). On Debian or Ubuntu:
 
 ```bash
 sudo apt install python3 python3-venv python3-tk
@@ -74,14 +82,19 @@ python3 -m venv .venv
 
 ## `[x]` Security
 
-- The link contains a new random token for every launch.
+- The public link contains a new high-entropy random token for every launch.
+- The origin server listens only on `127.0.0.1`; Cloudflare Tunnel is its only public route.
 - Received filenames are sanitized to prevent access outside the shared folder.
 - Symbolic links and incomplete `.part` files are excluded from listings.
 - Existing files are never overwritten.
 - Each upload is limited to **10 GiB**.
 - The server stops when the application closes.
 
-QrOpen uses unencrypted HTTP on the local network. Anyone with the QR code or link can read and upload files while the server is running. Use it only on trusted networks and share a folder without sensitive data.
+Traffic between the browser and Cloudflare uses HTTPS. Anyone with the QR code or full link can read and upload files while the server is running. Share the link only with trusted people and select a folder without sensitive data.
+
+Cloudflare Quick Tunnels are intended for testing and development, provide no uptime SLA, and allow up to 200 concurrent in-flight requests. Large uploads may also be subject to Cloudflare request limits. Use a named Cloudflare Tunnel for production.
+
+Quick Tunnels may not start when `~/.cloudflared/config.yaml` exists. Move that configuration out of the directory temporarily or use a named tunnel instead.
 
 ## `[?]` Testing
 

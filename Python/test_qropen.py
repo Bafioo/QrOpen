@@ -4,11 +4,15 @@ import threading
 import unittest
 from pathlib import Path
 
-from qropen import make_handler
+from qropen import TUNNEL_URL, make_handler
 from http.server import ThreadingHTTPServer
 
 
 class TransferTest(unittest.TestCase):
+    def test_quick_tunnel_url(self):
+        log = "Your quick Tunnel has been created! Visit it at https://fast-demo.trycloudflare.com"
+        self.assertEqual(TUNNEL_URL.search(log).group(0), "https://fast-demo.trycloudflare.com")
+
     def test_upload_download_and_safe_name(self):
         with tempfile.TemporaryDirectory() as temporary:
             folder = Path(temporary)
@@ -25,7 +29,7 @@ class TransferTest(unittest.TestCase):
                 self.assertEqual(connection.getresponse().status, 201)
                 connection.request("GET", "/secret/files/note.txt")
                 response = connection.getresponse()
-                self.assertEqual((response.status, response.read()), (200, b"hello"))
+                self.assertEqual((response.status, response.getheader("Cache-Control"), response.read()), (200, "no-store, private", b"hello"))
                 connection.request("GET", "/secret/")
                 page = connection.getresponse().read()
                 self.assertIn(b'<html lang="en">', page)
